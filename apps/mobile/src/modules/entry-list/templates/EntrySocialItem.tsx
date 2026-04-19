@@ -6,6 +6,7 @@ import { useEntryTranslation } from "@follow/store/translation/hooks"
 import { unreadSyncService } from "@follow/store/unread/store"
 import { useIsLoggedIn } from "@follow/store/user/hooks"
 import { tracker } from "@follow/tracker"
+import { cn } from "@follow/utils"
 import type { ImageSource } from "expo-image"
 import { memo, useCallback } from "react"
 import { Pressable, View } from "react-native"
@@ -26,6 +27,7 @@ import { NativePressable } from "@/src/components/ui/pressable/NativePressable"
 import { Text } from "@/src/components/ui/typography/Text"
 import { VideoPlayer } from "@/src/components/ui/video/VideoPlayer"
 import { useNavigation } from "@/src/lib/navigation/hooks"
+import { useSelectSplitViewEntry, useSplitViewEnabled, useSplitViewEntryId } from "@/src/modules/split-view"
 import { EntryDetailScreen } from "@/src/screens/(stack)/entries/[entryId]/EntryDetailScreen"
 import { FeedScreen } from "@/src/screens/(stack)/feeds/[feedId]/FeedScreen"
 
@@ -57,6 +59,9 @@ export const EntrySocialItem = memo(
     const feed = useFeedById(entry?.feedId || "")
     const isLoggedIn = useIsLoggedIn()
     const navigation = useNavigation()
+    const isSplitView = useSplitViewEnabled()
+    const selectSplitViewEntry = useSelectSplitViewEntry()
+    const selectedEntryId = useSplitViewEntryId()
     const handlePress = useCallback(() => {
       if (isLoggedIn) {
         unreadSyncService.markEntryAsRead(entryId)
@@ -65,12 +70,17 @@ export const EntrySocialItem = memo(
         feedId: entry?.feedId ?? "",
         entryId,
       })
-      navigation.pushControllerView(EntryDetailScreen, {
-        entryId,
-        entryIds: extraData.entryIds ?? [],
-        view: FeedViewType.SocialMedia,
-      })
-    }, [entry?.feedId, entryId, extraData.entryIds, isLoggedIn, navigation])
+      if (isSplitView) {
+        selectSplitViewEntry(entryId, FeedViewType.SocialMedia, extraData.entryIds ?? [])
+      } else {
+        navigation.pushControllerView(EntryDetailScreen, {
+          entryId,
+          entryIds: extraData.entryIds ?? [],
+          view: FeedViewType.SocialMedia,
+        })
+      }
+    }, [entry?.feedId, entryId, extraData.entryIds, isLoggedIn, navigation, isSplitView, selectSplitViewEntry])
+    const isSelected = isSplitView && selectedEntryId === entryId
     const autoExpandLongSocialMedia = useGeneralSettingKey("autoExpandLongSocialMedia")
     const navigationToFeedEntryList = useCallback(() => {
       if (!entry?.feedId) return
@@ -117,7 +127,7 @@ export const EntrySocialItem = memo(
       <EntryItemContextMenu id={entryId} view={FeedViewType.SocialMedia}>
         <ItemPressable
           itemStyle={ItemPressableStyle.Plain}
-          className="flex flex-col gap-2 p-4 pl-6"
+          className={cn("flex flex-col gap-2 p-4 pl-6", isSelected && "bg-secondary-system-background")}
           onPress={handlePress}
         >
           {!entry.read && (

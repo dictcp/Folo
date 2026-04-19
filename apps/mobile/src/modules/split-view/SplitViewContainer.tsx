@@ -1,8 +1,11 @@
 import type { PropsWithChildren } from "react"
+import { useEffect } from "react"
 import { View } from "react-native"
 import { useColor } from "react-native-uikit-colors"
 
-import { useSplitViewEnabled, useSplitViewEntry } from "./SplitViewContext"
+import { useSelectedFeed } from "@/src/modules/screen/atoms"
+
+import { clearSplitViewEntry, useSplitViewEnabled, useSplitViewEntry } from "./SplitViewContext"
 import { SplitViewEmptyDetail, SplitViewEntryDetail } from "./SplitViewEntryDetail"
 
 const SPLIT_VIEW_LEFT_WIDTH_RATIO = 0.4
@@ -22,6 +25,12 @@ export function SplitViewContainer({ children }: PropsWithChildren) {
 function SplitViewLayout({ children }: PropsWithChildren) {
   const splitViewEntry = useSplitViewEntry()
   const separatorColor = useColor("opaqueSeparator")
+  const selectedFeed = useSelectedFeed()
+
+  // Clear the selected entry when the feed/timeline selection changes
+  useEffect(() => {
+    clearSplitViewEntry()
+  }, [selectedFeed])
 
   return (
     <View className="flex-1 flex-row">
