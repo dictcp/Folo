@@ -1,3 +1,4 @@
+export { SplitViewContainer } from "./SplitViewContainer"
 export {
   clearSplitViewEntry,
   useSelectSplitViewEntry,
@@ -5,5 +6,4 @@ export {
   useSplitViewEntry,
   useSplitViewEntryId,
 } from "./SplitViewContext"
-export { SplitViewContainer } from "./SplitViewContainer"
 export { SplitViewEmptyDetail, SplitViewEntryDetail } from "./SplitViewEntryDetail"
