@@ -25,6 +25,7 @@ import { useNavigation } from "@/src/lib/navigation/hooks"
 import { isIOS } from "@/src/lib/platform"
 import { player, useAudioPlayState } from "@/src/lib/player"
 import { toast } from "@/src/lib/toast"
+import { useSelectSplitViewEntry, useSplitViewEnabled, useSplitViewEntryId } from "@/src/modules/split-view"
 import { EntryDetailScreen } from "@/src/screens/(stack)/entries/[entryId]/EntryDetailScreen"
 
 import { EntryItemContextMenu } from "../../context-menu/entry"
@@ -68,6 +69,9 @@ export const EntryNormalItem = memo(
     const from = getInboxFrom(entry)
     const feed = useFeedById(entry?.feedId as string)
     const navigation = useNavigation()
+    const isSplitView = useSplitViewEnabled()
+    const selectSplitViewEntry = useSelectSplitViewEntry()
+    const selectedEntryId = useSplitViewEntryId()
     const handlePress = useCallback(() => {
       if (entry) {
         const fullEntry = getEntry(entryId)
@@ -76,13 +80,18 @@ export const EntryNormalItem = memo(
           feedId: entry.feedId!,
           entryId: entry.id,
         })
-        navigation.pushControllerView(EntryDetailScreen, {
-          entryId,
-          entryIds: extraData.entryIds ?? [],
-          view,
-        })
+        if (isSplitView) {
+          selectSplitViewEntry(entryId, view, extraData.entryIds ?? [])
+        } else {
+          navigation.pushControllerView(EntryDetailScreen, {
+            entryId,
+            entryIds: extraData.entryIds ?? [],
+            view,
+          })
+        }
       }
-    }, [entry, navigation, entryId, extraData.entryIds, view])
+    }, [entry, navigation, entryId, extraData.entryIds, view, isSplitView, selectSplitViewEntry])
+    const isSelected = isSplitView && selectedEntryId === entryId
     const audioOrVideo = entry?.attachments?.find(
       (attachment) =>
         attachment.mime_type?.startsWith("audio/") || attachment.mime_type?.startsWith("video/"),
@@ -100,6 +109,7 @@ export const EntryNormalItem = memo(
           className={cn(
             view === FeedViewType.Notifications ? "p-2" : "p-4",
             "flex flex-row items-center pl-6",
+            isSelected && "bg-secondary-system-background",
           )}
           onPress={handlePress}
         >

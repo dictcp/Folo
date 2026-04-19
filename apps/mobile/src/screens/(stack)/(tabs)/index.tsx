@@ -2,10 +2,15 @@ import { useResetTabOpacityWhenFocused } from "@/src/components/layouts/tabbar/h
 import { usePrepareEntryRenderWebView } from "@/src/components/native/webview/hooks"
 import type { TabScreenComponent } from "@/src/lib/navigation/bottom-tab/types"
 import { EntryList } from "@/src/modules/entry-list"
+import { SplitViewContainer } from "@/src/modules/split-view"
 
 export const IndexTabScreen: TabScreenComponent = () => {
   usePrepareEntryRenderWebView()
   useResetTabOpacityWhenFocused()
 
-  return <EntryList />
+  return (
+    <SplitViewContainer>
+      <EntryList />
+    </SplitViewContainer>
+  )
 }

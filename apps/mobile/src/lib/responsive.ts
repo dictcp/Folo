@@ -4,7 +4,6 @@ import type { ViewStyle } from "react-native"
 import { Dimensions, useWindowDimensions } from "react-native"
 
 import { useDeviceType } from "../atoms/hooks/useDeviceType"
-import { isIOS } from "./platform"
 
 const baseWidth = 375
 const baseHeight = 812
@@ -56,10 +55,6 @@ export const useScaleHeight = () => {
 export const useIsTabletLayout = () => {
   const deviceType = useDeviceType()
   const { width, height } = useWindowDimensions()
-
-  if (!isIOS) {
-    return false
-  }
 
   return deviceType === DeviceType.TABLET || Math.min(width, height) >= tabletMinLength
 }
